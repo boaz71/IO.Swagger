@@ -66,9 +66,10 @@ namespace MathCalculator.Tests
         public void InvalidOperation_ReturnsBadRequest()
         {
             var body = new MathCalculateBody { Number1 = 1, Number2 = 2 };
-            var result = _controller.Calculate(body, "modulo") as BadRequestObjectResult;
+            var result = _controller.Calculate(body, "xor") as BadRequestObjectResult;
 
-            Assert.Equal("Invalid operation type.", result.Value);
+            Assert.Contains("Invalid operation type", result.Value.ToString());
+
         }
 
         [Fact]
@@ -87,6 +88,28 @@ namespace MathCalculator.Tests
 
             Assert.Equal("Missing body or operation type.", result.Value);
         }
+
+        [Fact]
+        public void InvalidOperationType_ReturnsBadRequest()
+        {
+            var body = new MathCalculateBody { Number1 = 5, Number2 = 2 };
+            var result = _controller.Calculate(body, "modulo") as BadRequestObjectResult;
+
+            Assert.NotNull(result);
+            Assert.Equal("Invalid operation type. Must be one of: add, subtract, multiply, divide.", result.Value);
+        }
+
+        [Fact]
+        public void MissingOperationTypeHeader_ReturnsBadRequest()
+        {
+            var body = new MathCalculateBody { Number1 = 5, Number2 = 2 };
+            var result = _controller.Calculate(body, "") as BadRequestObjectResult;
+
+            Assert.NotNull(result);
+            Assert.Equal("Missing body or operation type.", result.Value);
+        }
+
+    
 
         // Helper method to extract "result" value from anonymous object
         private double GetResultValue(OkObjectResult result)

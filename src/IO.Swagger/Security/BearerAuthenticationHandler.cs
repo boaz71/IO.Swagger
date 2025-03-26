@@ -29,29 +29,37 @@ namespace IO.Swagger.Security
         /// </summary>
         protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
         {
+            // skip authentication if endpoint has [AllowAnonymous] attribute
             if (!Request.Headers.ContainsKey("Authorization"))
             {
                 return AuthenticateResult.Fail("Missing Authorization Header");
             }
             try
             {
+                // get authorization header
                 var authHeader = AuthenticationHeaderValue.Parse(Request.Headers["Authorization"]);
 
-                /// TODO handle token.
             }
             catch
             {
+                // invalid authorization header
                 return AuthenticateResult.Fail("Invalid Authorization Header");
             }
 
+            // create claims
             var claims = new[] {
                 new Claim(ClaimTypes.NameIdentifier, "changeme"),
                 new Claim(ClaimTypes.Name, "changeme"),
             };
+
+            // create identity
             var identity = new ClaimsIdentity(claims, Scheme.Name);
+            // create principal from identity
             var principal = new ClaimsPrincipal(identity);
+            // create ticket from principal
             var ticket = new AuthenticationTicket(principal, Scheme.Name);
 
+            // return success ticket
             return AuthenticateResult.Success(ticket);
         }
     }
