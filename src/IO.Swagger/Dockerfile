@@ -1,19 +1,24 @@
-FROM mcr.microsoft.com/dotnet/core/sdk:7.0 AS build-env
+﻿# שלב בסיס
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
+EXPOSE 8080
 
-ENV DOTNET_CLI_TELEMETRY_OPTOUT 1
+# שלב build
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
 
-# copy csproj and restore as distinct layers
-COPY *.csproj ./
-RUN dotnet restore
+COPY ["src/IO.Swagger/IO.Swagger.csproj", "src/IO.Swagger/"]
+COPY ["NuGet.Config", "."]
+RUN dotnet restore "src/IO.Swagger/IO.Swagger.csproj"
 
-# copy everything else and build
-COPY . ./
-RUN dotnet publish -c Release -o out
+COPY . .
+WORKDIR "/src/src/IO.Swagger"
+RUN dotnet publish "IO.Swagger.csproj" -c Release -o /app/publish
 
-# build runtime image
-FROM mcr.microsoft.com/dotnet/core/aspnet:7.0
+# שלב סופי
+FROM base AS final
 WORKDIR /app
-COPY --from=build-env /app/out .
+COPY --from=build /app/publish .
 
-ENTRYPOINT ["dotnet", "IO.Swagger.dll"]
+# הגדרת פורט להרצה
+ENTRYPOINT ["dotnet", "IO.Swagger.dll", "--urls", "http://+:8080"]
