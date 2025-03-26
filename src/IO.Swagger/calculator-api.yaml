@@ -1,0 +1,61 @@
+openapi: 3.0.1
+info:
+  title: Math Calculator API
+  description: REST API to perform a mathematical operation on two numbers.
+  version: 1.0.0
+servers:
+  # Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/boazcompany/CalculatorAPI/1.0.0
+  - url: http://localhost:5000
+  - url: http://localhost:50352
+paths:
+  /api/calculator/calculate:
+    post:
+      summary: Perform a mathematical operation on two numbers
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: header
+          name: X-Operation-Type
+          required: true
+          schema:
+            type: string
+            enum: [add, subtract, multiply, divide]
+          description: The operation to perform
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                number1:
+                  type: number
+                number2:
+                  type: number
+              required:
+                - number1
+                - number2
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: number
+        '400':
+          description: Invalid input or operation
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
